@@ -1,0 +1,10 @@
+DROP TABLE orders;
+DROP TABLE deliveries;
+DROP TABLE payments;
+DROP TABLE items;
+DROP TABLE schema_migrations;
+
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM myuser;
+REVOKE ALL PRIVILEGES ON SCHEMA public FROM myuser;
+
+DROP USER IF EXISTS myuser;
