@@ -7,8 +7,7 @@ import (
 )
 
 type Config struct {
-	Port    string `default:":8081" envconfig:"HTTP_PORT"`
-	Swagger string `envconfig:"SWAG_URL"`
+	Url    string `default:"localhost:8081" envconfig:"URL"`
 }
 
 type Server struct {
@@ -18,14 +17,12 @@ type Server struct {
 func New(r http.Handler, c Config) *Server {
 	r = http.TimeoutHandler(r, time.Second*5, "request timeout")
 
-	h := &Server{
-		HTTPServer: &http.Server{
-			Addr:    c.Port,
-			Handler: r,
-		},
-	}
-
-	return h
+	return &Server{
+			HTTPServer: &http.Server{
+				Addr:    c.Url,
+				Handler: r,
+			},
+		}
 }
 
 func (s *Server) Run() error {

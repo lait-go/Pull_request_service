@@ -10,6 +10,14 @@ import (
 	"github.com/oapi-codegen/runtime"
 )
 
+type ServerInterfaceWrapper struct {
+	Handler            ServerInterface
+	HandlerMiddlewares []MiddlewareFunc
+	ErrorHandlerFunc   func(w http.ResponseWriter, r *http.Request, err error)
+}
+
+type MiddlewareFunc func(http.Handler) http.Handler
+
 // PostPullRequestCreate operation middleware
 func (siw *ServerInterfaceWrapper) PostPullRequestCreate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()

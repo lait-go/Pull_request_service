@@ -8,9 +8,6 @@ import (
 	"syscall"
 
 	config "revivers/config"
-	_ "revivers/docs"
-	"revivers/internal/adapters/cache"
-	kafkaconsumer "revivers/internal/adapters/kafka_consumer"
 	"revivers/internal/adapters/postgres"
 	"revivers/internal/adapters/postgres/migrations"
 	"revivers/internal/controlers/http"
@@ -43,12 +40,6 @@ func main() {
 	}
 }
 
-// @title Subscription API
-// @version 1.0
-// @description API для управления подписками пользователей
-// @host localhost:8081
-// @BasePath /
-// @schemes http
 func AppRun(ctx context.Context, c *config.Config) error {
 	post, err := postgres.New(ctx, c.Postgres)
 	if err != nil {
@@ -56,32 +47,17 @@ func AppRun(ctx context.Context, c *config.Config) error {
 	}
 	logger.Info("postgres initialized")
 
-	cache, err := cache.New(ctx, c.Cache, post)
-	if err != nil {
-		return err
-	}
-	logger.Info("cache initialized")
-
-	kafka := kafkaconsumer.NewConsumer(c.Kafka)
-	logger.Info("kafka initialized")
-
-	profile := usecase.NewProfile(post, cache, kafka)
+	profile := usecase.NewProfile(post)
 	logger.Info("usecase layer initialized")
 
-	router := http.Router(profile, c.Http)
+	router := http.HandlerWithBaseURL(profile, c.Http.Url)
 	logger.Info("router initialized")
-
-	go func() {
-		if err := profile.CreateOrder(ctx); err != nil {
-			logger.Error("failed to create subscription", err)
-		}
-	}()
 
 	server := http_server.New(router, c.Http)
 	if err = server.Run(); err != nil {
 		return err
 	}
-	logger.Info("HTTP server started on port: " + c.Http.Port)
+	logger.Info("HTTP server started on URL: " + c.Http.Url)
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
@@ -89,7 +65,6 @@ func AppRun(ctx context.Context, c *config.Config) error {
 	<-sig
 
 	post.Close()
-	kafka.Close()
 	server.Close()
 
 	return nil

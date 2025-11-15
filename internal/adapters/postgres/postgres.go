@@ -8,23 +8,15 @@ import (
 )
 
 type Config struct {
-	User     string `envconfig:"POSTGRES_USER"     required:"true"`
-	Password string `envconfig:"POSTGRES_PASSWORD" required:"true"`
-	Port     string `envconfig:"DB_PORT"     required:"true"`
-	Host     string `envconfig:"DB_HOST"     required:"true"`
-	DBName   string `envconfig:"DB_NAME"  required:"true"`
+	Source string `envconfig:"DB_SOURCE" required:"true"`
 }
 
 type Pool struct {
 	DB *sqlx.DB
 }
 
-func (c *Config) DbKeyInit() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", c.User, c.Password, c.Host, c.Port, c.DBName)
-}
-
 func New(ctx context.Context, cfg Config) (*Pool, error) {
-	db, err := sqlx.ConnectContext(ctx, "postgres", cfg.DbKeyInit())
+	db, err := sqlx.ConnectContext(ctx, "postgres", cfg.Source)
 	if err != nil {
 		return nil, fmt.Errorf("Error connection to bd: %w", err)
 	}
