@@ -56,7 +56,7 @@ func AppRun(ctx context.Context, c *config.Config) error {
 	controller := http.NewController(service)
 	logger.Info("HTTP controller initialized")
 
-	router := http.HandlerWithBaseURL(controller, "")
+	router := http.Handler(controller)
 	logger.Info("router initialized")
 
 	server := http_server.New(router, c.Http)

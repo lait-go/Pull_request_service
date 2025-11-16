@@ -15,13 +15,24 @@ type ChiServerOptions struct {
 
 // Handler creates http.Handler with routing matching OpenAPI spec.
 func Handler(si ServerInterface) http.Handler {
-	return HandlerWithOptions(si, ChiServerOptions{})
+	return HandlerWithOptions(si, ChiServerOptions{
+		Middlewares: []MiddlewareFunc{
+			RecoveryMiddleware,  // Обработка паник - первым, чтобы ловить все паники
+			RequestIDMiddleware, // Request ID для трейсинга
+			LoggingMiddleware,   // Логирование запросов
+		},
+	})
 }
 
 // HandlerFromMux creates http.Handler with routing matching OpenAPI spec based on the provided mux.
 func HandlerFromMux(si ServerInterface, r chi.Router) http.Handler {
 	return HandlerWithOptions(si, ChiServerOptions{
 		BaseRouter: r,
+		Middlewares: []MiddlewareFunc{
+			RecoveryMiddleware,  // Обработка паник - первым, чтобы ловить все паники
+			RequestIDMiddleware, // Request ID для трейсинга
+			LoggingMiddleware,   // Логирование запросов
+		},
 	})
 }
 
