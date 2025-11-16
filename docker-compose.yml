@@ -1,0 +1,9 @@
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: lait
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: orders_db
+    ports:
+      - "5432:5432" 

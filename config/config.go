@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"revivers/internal/adapters/postgres"
-	"revivers/internal/adapters/postgres/migrations"
 	"revivers/pkg/http_server"
 	"revivers/pkg/logger"
 
@@ -12,7 +11,6 @@ import (
 )
 
 type Config struct {
-	Migrate  migrations.Config
 	Postgres postgres.Config
 	Http     http_server.Config
 	Logger   logger.Config

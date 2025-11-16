@@ -26,8 +26,9 @@ func main() {
 	logger.Info("logger initialized")
 
 	logger.Info("starting migration...")
-	if err = migrations.RunMigrate("internal/adapters/postgres/migrations", c.Migrate); err != nil {
+	if err = migrations.RunMigrate("internal/adapters/postgres/migrations/", c.Postgres); err != nil {
 		logger.Error("migration failed", err)
+		os.Exit(1)
 	} else {
 		logger.Info("migration completed")
 	}
@@ -47,10 +48,15 @@ func AppRun(ctx context.Context, c *config.Config) error {
 	}
 	logger.Info("postgres initialized")
 
-	profile := usecase.NewProfile(post)
+	// Создаем usecase сервис
+	service := usecase.NewService(post)
 	logger.Info("usecase layer initialized")
 
-	router := http.HandlerWithBaseURL(profile, c.Http.Url)
+	// Создаем HTTP контроллер, который реализует ServerInterface
+	controller := http.NewController(service)
+	logger.Info("HTTP controller initialized")
+
+	router := http.HandlerWithBaseURL(controller, "")
 	logger.Info("router initialized")
 
 	server := http_server.New(router, c.Http)
