@@ -28,7 +28,6 @@ run: ## Запустить приложение
 	@echo "$(GREEN)Running application...$(NC)"
 	go run $(MAIN_PATH)
 
-
 migrate-up: ## Применить миграции
 	@echo "$(GREEN)Running migrations...$(NC)"
 	@if [ -z "$(DB_SOURCE)" ]; then \
@@ -43,11 +42,23 @@ migrate-down: ## Откатить миграции (требует migrate CLI)
 	@echo "$(YELLOW)Note: This requires migrate CLI tool$(NC)"
 	@migrate -path $(MIGRATIONS_PATH) -database "$(TEST_DB_SOURCE)" down || echo "$(YELLOW)Migrate CLI not found$(NC)"
 
-test: ## Запустить тесты
+test: ## Запустить unit тесты
 	@echo "$(GREEN)Running integration tests...$(NC)"
 	@echo "$(YELLOW)Using TEST_DB_SOURCE: $(TEST_DB_SOURCE)$(NC)"
 	TEST_DB_SOURCE=$(TEST_DB_SOURCE) go test -v -short=false ./internal/controlers/http/... -run TestIntegration_AllHandlers
 
+
+lint: ## Запустить линтер
+	@echo "$(GREEN)Running linter...$(NC)"
+	@golangci-lint run ./... || echo "$(YELLOW)golangci-lint not installed$(NC)"
+
+fmt: ## Форматировать код
+	@echo "$(GREEN)Formatting code...$(NC)"
+	go fmt ./...
+
+vet: ## Запустить go vet
+	@echo "$(GREEN)Running go vet...$(NC)"
+	go vet ./...
 
 clean: ## Очистить скомпилированные файлы
 	@echo "$(GREEN)Cleaning...$(NC)"
@@ -61,6 +72,3 @@ setup: docker-up migrate-up ## Полная настройка (Docker + миг�
 check: fmt vet test ## Проверить код (fmt + vet + test)
 
 ci: deps fmt vet test test-integration ## CI pipeline (deps + fmt + vet + test + integration)
-
-full-test: test-integration test-bash-comprehensive ## Запустить все тесты (Go integration + bash comprehensive)
-

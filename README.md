@@ -2,7 +2,7 @@
 
 Сервис назначения ревьюеров для Pull Request'ов (Тестовое задание для стажёра Backend, осенняя волна 2025).
 
-## 🚀 Быстрый запуск
+## Быстрый запуск
 
 ```bash
 docker-compose up
@@ -58,8 +58,6 @@ docker-compose up
 #### 1. Установка зависимостей
 
 ```bash
-make deps
-# или
 go mod download
 ```
 
@@ -128,35 +126,10 @@ API соответствует OpenAPI спецификации (`openapi.yml`):
 │   ├── domain/          # Доменные модели и ошибки
 │   └── usecase/         # Бизнес-логика
 ├── pkg/                  # Вспомогательные пакеты
-├── scripts/              # Bash скрипты для тестирования
 ├── Dockerfile            # Docker образ приложения
 ├── docker-compose.yml    # Docker Compose конфигурация
 ├── Makefile              # Команды для разработки
 └── openapi.yml           # OpenAPI спецификация
-```
-
-## Makefile команды
-
-```bash
-make help              # Показать справку по всем командам
-make deps              # Установить зависимости
-make build             # Собрать приложение
-make run               # Запустить приложение
-make test              # Запустить unit тесты
-make test-integration  # Запустить интеграционные тесты (Go)
-make test-bash         # Запустить bash API тесты
-make test-bash-comprehensive  # Комплексные bash тесты (20 команд, 200 PR)
-make full-test         # Запустить все тесты
-make docker-up         # Запустить Docker контейнеры
-make docker-down       # Остановить Docker контейнеры
-make migrate-up        # Применить миграции
-make setup             # Полная настройка (Docker + миграции)
-make dev               # Запустить в режиме разработки
-make fmt               # Форматировать код
-make vet               # Запустить go vet
-make lint              # Запустить линтер (если установлен)
-make clean             # Очистить скомпилированные файлы
-make ci                # CI pipeline (deps + fmt + vet + test + integration)
 ```
 
 ## Переменные окружения
@@ -172,10 +145,6 @@ URL=0.0.0.0:8080
 
 # Логгер
 LOGGER_LEVEL=info  # debug, info, warn, error
-
-# Для тестов
-TEST_DB_SOURCE=postgres://user:password@host:port/test_db?sslmode=disable
-API_URL=http://localhost:8080
 ```
 
 ## Тестирование
@@ -185,22 +154,8 @@ API_URL=http://localhost:8080
 ```bash
 # Unit тесты
 make test
-
-# Интеграционные тесты
-make test-integration
 ```
 
-### Bash API тесты
-
-```bash
-# Базовые тесты
-make test-bash
-
-# Комплексные тесты (20 команд, 200 PR)
-make test-bash-comprehensive
-```
-
-Подробнее см. [TEST_README.md](./TEST_README.md)
 
 ## Особенности реализации
 
@@ -254,32 +209,11 @@ make test-bash-comprehensive
 
 ### Полная настройка окружения
 
-```bash
-# 1. Установить зависимости
-make deps
-
-# 2. Запустить Docker и применить миграции
-make setup
-
-# 3. Запустить приложение
-make run
-```
-
 ### Проверка кода перед коммитом
 
 ```bash
 # Форматирование, проверка и тесты
 make check
-
-# Или полный CI pipeline
-make ci
-```
-
-### Запуск в режиме разработки
-
-```bash
-# Автоматически настроит окружение и запустит приложение
-make dev
 ```
 
 ## Миграции
@@ -293,81 +227,3 @@ make dev
 ```bash
 make migrate-up
 ```
-
-## Docker
-
-### Запуск всего стека
-
-```bash
-docker-compose up
-```
-
-Сервис будет доступен на `http://localhost:8080`
-
-### Только база данных
-
-```bash
-docker-compose up db
-```
-
-### Остановка
-
-```bash
-docker-compose down
-```
-
-### Просмотр логов
-
-```bash
-docker-compose logs -f
-```
-
-## Troubleshooting
-
-### Проблемы с подключением к БД
-
-1. Убедитесь, что PostgreSQL запущен:
-   ```bash
-   docker-compose up db
-   ```
-
-2. Проверьте строку подключения в `.env` или переменной окружения `DB_SOURCE`
-
-3. Проверьте доступность БД:
-   ```bash
-   psql "postgres://user:password@localhost:5432/dbname"
-   ```
-
-### Проблемы с тестами
-
-1. Убедитесь, что тестовая БД доступна
-2. Проверьте переменную `TEST_DB_SOURCE`
-3. Для интеграционных тестов БД должна быть пустой или будет очищена автоматически
-
-### Проблемы с API тестами
-
-1. Убедитесь, что приложение запущено:
-   ```bash
-   docker-compose up
-   # или
-   make run
-   ```
-
-2. Проверьте URL в переменной `API_URL` (по умолчанию `http://localhost:8080`)
-
-3. Убедитесь, что `jq` установлен (для форматирования JSON в тестах):
-   ```bash
-   # macOS
-   brew install jq
-   
-   # Ubuntu/Debian
-   sudo apt-get install jq
-   ```
-
-## Лицензия
-
-[Указать лицензию]
-
-## Контакты
-
-[Контактная информация]

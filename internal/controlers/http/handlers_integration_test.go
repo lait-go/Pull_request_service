@@ -23,42 +23,6 @@ var (
 	testController *Controller
 )
 
-// setupTestDB настраивает тестовую БД (используется в отдельных тестах)
-func setupTestDB(t *testing.T) *postgres.Pool {
-	// Используем тестовую БД из переменной окружения или дефолтную
-	dbSource := os.Getenv("TEST_DB_SOURCE")
-	if dbSource == "" {
-		dbSource = "postgres://lait:123@localhost:5432/orders_db?sslmode=disable"
-	}
-
-	ctx := context.Background()
-	cfg := postgres.Config{Source: dbSource}
-
-	// Создаем подключение
-	pool, err := postgres.New(ctx, cfg)
-	if err != nil {
-		t.Fatalf("Failed to connect to test database: %v", err)
-	}
-
-	// Запускаем миграции
-	if err := migrations.RunMigrate("../../adapters/postgres/migrations/", cfg); err != nil {
-		t.Fatalf("Failed to run migrations: %v", err)
-	}
-
-	// Очищаем БД перед тестами
-	_, err = pool.DB.ExecContext(ctx, `
-		TRUNCATE TABLE pull_request_reviewers CASCADE;
-		TRUNCATE TABLE pull_requests CASCADE;
-		TRUNCATE TABLE users CASCADE;
-		TRUNCATE TABLE teams CASCADE;
-	`)
-	if err != nil {
-		t.Fatalf("Failed to clean database: %v", err)
-	}
-
-	return pool
-}
-
 func TestMain(m *testing.M) {
 	// Настраиваем тестовую БД
 	dbSource := os.Getenv("TEST_DB_SOURCE")
@@ -1051,7 +1015,7 @@ func testErrorHandling(t *testing.T, controller *Controller, teams []domain.Team
 					t.Errorf("Expected 404, got %d", w.Code)
 				}
 				var errResp domain.ErrorResponse
-				json.Unmarshal(w.Body.Bytes(), &errResp)
+				_ = json.Unmarshal(w.Body.Bytes(), &errResp)
 				if errResp.Error.Code != domain.NOTFOUND {
 					t.Errorf("Expected NOTFOUND error code")
 				}

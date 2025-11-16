@@ -16,11 +16,11 @@ func RunMigrate(path string, cfg postgres.Config) error {
 	
 	mig, err := migrate.New(fmt.Sprintf("file://%s", path), cfg.Source)
 	if err != nil {
-		return fmt.Errorf("Error to run migration: %w", err)
+		return fmt.Errorf("failed to run migration: %w", err)
 	}
 
 	if err = mig.Up(); err != nil && err != migrate.ErrNoChange {
-		return fmt.Errorf("Error to up migration: %w", err)
+		return fmt.Errorf("failed to up migration: %w", err)
 	}
 
 	return nil

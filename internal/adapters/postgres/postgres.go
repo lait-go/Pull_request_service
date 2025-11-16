@@ -18,11 +18,11 @@ type Pool struct {
 func New(ctx context.Context, cfg Config) (*Pool, error) {
 	db, err := sqlx.ConnectContext(ctx, "postgres", cfg.Source)
 	if err != nil {
-		return nil, fmt.Errorf("Error connection to bd: %w", err)
+		return nil, fmt.Errorf("failed connection to bd: %w", err)
 	}
 
 	if err = db.PingContext(ctx); err != nil {
-		return nil, fmt.Errorf("error pinging database: %w", err)
+		return nil, fmt.Errorf("failed pinging database: %w", err)
 	}
 
 	return &Pool{
