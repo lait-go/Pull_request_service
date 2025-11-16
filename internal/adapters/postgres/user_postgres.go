@@ -95,3 +95,34 @@ func (p *Pool) ActiveUsersGetByTeamID(ctx context.Context, teamID int, excludeUs
 	return users, nil
 }
 
+// UserGet получает пользователя по user_id с информацией о команде
+func (p *Pool) UserGet(ctx context.Context, userID string) (*domain.User, error) {
+	var user domain.User
+	var teamName sql.NullString
+
+	err := p.DB.QueryRowContext(ctx,
+		`SELECT u.user_id, u.username, u.is_active, t.team_name
+		 FROM users u
+		 LEFT JOIN teams t ON u.team_id = t.id
+		 WHERE u.user_id = $1`,
+		userID,
+	).Scan(&user.UserId, &user.Username, &user.IsActive, &teamName)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, &domain.NotFoundError{
+				Resource: "user",
+				ID:       userID,
+			}
+		}
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	if teamName.Valid {
+		user.TeamName = teamName.String
+	} else {
+		user.TeamName = ""
+	}
+
+	return &user, nil
+}
+

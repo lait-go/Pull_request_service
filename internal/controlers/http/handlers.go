@@ -61,7 +61,11 @@ func (c *Controller) PostPullRequestCreate(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	render.JSON(w, pr, http.StatusCreated)
+	// Согласно openapi.yaml, ответ должен быть обернут в объект {pr: PullRequest}
+	response := map[string]interface{}{
+		"pr": pr,
+	}
+	render.JSON(w, response, http.StatusCreated)
 }
 
 // PostPullRequestMerge помечает PR как MERGED (идемпотентная операция)
@@ -73,12 +77,17 @@ func (c *Controller) PostPullRequestMerge(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err := c.useCase.MergePullRequest(r.Context(), req); err != nil {
+	pr, err := c.useCase.MergePullRequest(r.Context(), req)
+	if err != nil {
 		handleUseCaseError(w, r, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	// Согласно openapi.yaml, ответ должен быть обернут в объект {pr: PullRequest}
+	response := map[string]interface{}{
+		"pr": pr,
+	}
+	render.JSON(w, response, http.StatusOK)
 }
 
 // PostPullRequestReassign переназначает конкретного ревьювера на другого из его команды
@@ -90,12 +99,18 @@ func (c *Controller) PostPullRequestReassign(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if err := c.useCase.ReassignReviewer(r.Context(), req); err != nil {
+	pr, newReviewerID, err := c.useCase.ReassignReviewer(r.Context(), req)
+	if err != nil {
 		handleUseCaseError(w, r, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	// Согласно openapi.yaml, ответ должен быть {pr: PullRequest, replaced_by: string}
+	response := map[string]interface{}{
+		"pr":          pr,
+		"replaced_by": newReviewerID,
+	}
+	render.JSON(w, response, http.StatusOK)
 }
 
 // PostTeamAdd создает команду с участниками (создаёт/обновляет пользователей)
@@ -109,14 +124,19 @@ func (c *Controller) PostTeamAdd(w http.ResponseWriter, r *http.Request) {
 
 	logger.Info("PostTeamAdd called with team: ", team.TeamName)
 
-	if err := c.useCase.CreateOrUpdateTeam(r.Context(), team); err != nil {
+	err := c.useCase.CreateOrUpdateTeam(r.Context(), team)
+	if err != nil {
 		handleUseCaseError(w, r, err)
 		return
 	}
 
 	logger.Info("Team created or updated successfully: ", team.TeamName)
+	
+	response := map[string]interface{}{
+		"team_name": team.TeamName,
+	}
 
-	w.WriteHeader(http.StatusOK)
+	render.JSON(w, response, http.StatusCreated)
 }
 
 // GetTeamGet возвращает команду с участниками
@@ -140,7 +160,12 @@ func (c *Controller) GetUsersGetReview(w http.ResponseWriter, r *http.Request, p
 		return
 	}
 
-	render.JSON(w, prs, http.StatusOK)
+	// Согласно openapi.yaml, ответ должен быть {user_id: string, pull_requests: []PullRequestShort}
+	response := map[string]interface{}{
+		"user_id":       params.UserId,
+		"pull_requests": prs,
+	}
+	render.JSON(w, response, http.StatusOK)
 }
 
 // PostUsersSetIsActive устанавливает флаг активности пользователя
@@ -152,10 +177,15 @@ func (c *Controller) PostUsersSetIsActive(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err := c.useCase.SetUserActive(r.Context(), req.UserId, req.IsActive); err != nil {
+	user, err := c.useCase.SetUserActive(r.Context(), req.UserId, req.IsActive)
+	if err != nil {
 		handleUseCaseError(w, r, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	// Согласно openapi.yaml, ответ должен быть обернут в объект {user: User}
+	response := map[string]interface{}{
+		"user": user,
+	}
+	render.JSON(w, response, http.StatusOK)
 }

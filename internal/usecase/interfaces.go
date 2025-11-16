@@ -13,10 +13,11 @@ type UseCase interface {
 	CreatePullRequest(ctx context.Context, req domain.PostPullRequestCreateJSONBody) (*domain.PullRequest, error)
 
 	// MergePullRequest помечает PR как MERGED (идемпотентная операция)
-	MergePullRequest(ctx context.Context, req domain.PostPullRequestMergeJSONBody) error
+	MergePullRequest(ctx context.Context, req domain.PostPullRequestMergeJSONBody) (*domain.PullRequest, error)
 
 	// ReassignReviewer переназначает конкретного ревьювера на другого из его команды
-	ReassignReviewer(ctx context.Context, req domain.PostPullRequestReassignJSONBody) error
+	// Возвращает PR и ID нового ревьювера
+	ReassignReviewer(ctx context.Context, req domain.PostPullRequestReassignJSONBody) (*domain.PullRequest, string, error)
 
 	// GetPullRequestsByReviewer возвращает PR'ы, где пользователь назначен ревьювером
 	GetPullRequestsByReviewer(ctx context.Context, userID string) ([]domain.PullRequestShort, error)
@@ -30,5 +31,6 @@ type UseCase interface {
 	GetTeam(ctx context.Context, teamName string) (*domain.Team, error)
 
 	// SetUserActive устанавливает флаг активности пользователя
-	SetUserActive(ctx context.Context, userID string, isActive bool) error
+	// Возвращает обновленного пользователя
+	SetUserActive(ctx context.Context, userID string, isActive bool) (*domain.User, error)
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type Config struct {
-	Url    string `default:"localhost:8081" envconfig:"URL"`
+	Url    string `default:"0.0.0.0:8080" envconfig:"URL"`
 }
 
 type Server struct {

@@ -1,0 +1,13 @@
+.git
+.gitignore
+*.md
+.env
+*.test
+coverage.out
+bin/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+

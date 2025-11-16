@@ -19,9 +19,9 @@ type Config struct {
 func InitConfig() (*Config, error) {
 	var cfg Config
 
-	if err := godotenv.Load(); err != nil {
-		return &Config{}, errors.New("Error loading .env file")
-	}
+	// Загружаем .env файл, если он существует (не критично, если его нет)
+	// Переменные окружения из docker-compose.yml имеют приоритет
+	_ = godotenv.Load()
 
 	err := envconfig.Process("", &cfg)
 	if err != nil {

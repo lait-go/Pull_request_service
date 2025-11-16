@@ -23,6 +23,7 @@ type PostgresRepository interface {
 
 	// User методы
 	UserSetActive(ctx context.Context, userID string, isActive bool) error
+	UserGet(ctx context.Context, userID string) (*domain.User, error)
 	UserGetByID(ctx context.Context, userID string) (int, int, error) // возвращает internal ID, teamID, error
 	ActiveUsersGetByTeamID(ctx context.Context, teamID int, excludeUserID int) ([]struct {
 		UserID     string
